@@ -41,8 +41,14 @@ setuptools.setup(
         'psutil>=6.0.0',
         'pydirectinput==1.0.4',
         'pycaw==20240210',
-        'mouse==0.7.1'
+        'mouse==0.7.1',
+        'click>=8.0.0'
     ],
+    entry_points={
+        'console_scripts': [
+            'ok-cli = ok.cli:cli',
+        ],
+    },
     python_requires='==3.12.*',
     zip_safe=False,
 )

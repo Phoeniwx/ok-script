@@ -310,13 +310,11 @@ def find_hwnd(title, exe_names, frame_width, frame_height, player_id=-1, class_n
         x, y, _, _, width, height, m_scaling = get_window_bounds(hwnd)
         if width <= 10 or height <= 10:
             return True
-        # logger.debug(f'find_hwnd EnumWindows selected_hwnd {selected_hwnd} {results}')
         results.append((hwnd, full_path, width, height, x, y, text, cname, m_scaling))
         return True
 
     results = []
     win32gui.EnumWindows(is_match, results)
-    # logger.debug(f'find_hwnd EnumWindows selected_hwnd {selected_hwnd} {results}')
     if not results:
         return None, 0, None, 0, 0, 0, 0, []
 
@@ -360,8 +358,6 @@ def find_hwnd(title, exe_names, frame_width, frame_height, player_id=-1, class_n
         if real_width < 10 or real_height < 10:
             logger.error(f'find_hwnd real_width, real_height too small return None {frame_width, frame_height} {biggest} {x_offset, y_offset, real_width, real_height}')
             return None, 0, None, 0, 0, 0, 0, []
-
-    # logger.debug(f'find_hwnd {results}')
 
     return biggest[6], biggest[0], biggest[1], x_offset, y_offset, real_width, real_height, results
 

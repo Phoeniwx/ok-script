@@ -37,6 +37,9 @@ def run_in_new_thread(func):
 
 
 def check_mutex():
+    # Skip mutex check for daemon processes
+    if os.environ.get("OK_CLI_DAEMON"):
+        return
     _LPSECURITY_ATTRIBUTES = wintypes.LPVOID
     _BOOL = ctypes.c_int
     _DWORD = ctypes.c_ulong

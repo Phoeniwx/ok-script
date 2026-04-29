@@ -706,6 +706,7 @@ class HwndWindow:
         self.top_hwnd_class = top_hwnd_class
         self.pos_valid = False
         self._hwnd_title = ""
+        self._manually_set_hwnd = False
         self.monitors_bounds = get_monitors_bounds()
         self.mute_option = global_config.get_config(basic_options)
         self.global_config = global_config
@@ -779,7 +780,8 @@ class HwndWindow:
             if width > 0 and height > 0:
                 self.frame_aspect_ratio = width / height
                 logger.debug(f"HwndWindow: frame ratio: width: {width}, height: {height}")
-        self.hwnd = 0
+        if not self._manually_set_hwnd:
+            self.hwnd = 0
         self.do_update_window_size()
 
     def update_window_size(self):
@@ -804,9 +806,11 @@ class HwndWindow:
             changed = False
             exists = False
             visible, x, y, window_width, window_height, width, height, scaling = self.visible, self.x, self.y, self.window_width, self.window_height, self.width, self.height, self.scaling
+            # When title is set, don't filter by exe (exe_names=None means search by title only)
+            exe_filter = self.exe_names if self.exe_names else (self.device_manager.config.get('selected_exe') if not self.title else None)
             name, find_hwnd_res, exe_full_path, real_x_offset, real_y_offset, real_width, real_height, hwnds = find_hwnd(
                 self.title,
-                self.exe_names or self.device_manager.config.get('selected_exe'),
+                exe_filter,
                 self.frame_width, self.frame_height, player_id=self.player_id, class_name=self.hwnd_class,
                 selected_hwnd=self.device_manager.config.get('selected_hwnd'),
                 top_hwnd_class=self.top_hwnd_class, last_hwnd=self.hwnd)
@@ -862,7 +866,8 @@ class HwndWindow:
                         communicate.quit.emit()
                     else:
                         communicate.notification.emit('Game Exited', None, True, True, None, None)
-                    self.hwnd = 0
+                    if not self._manually_set_hwnd:
+                        self.hwnd = 0
                     visible = False
                 if visible != self.visible:
                     self.visible = visible

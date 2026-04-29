@@ -9,6 +9,38 @@ import time
 import uuid
 from datetime import datetime
 
+os.environ.setdefault("DISABLE_QFluentWidgets_TIPS", "1")
+os.environ["PYTHONIOENCODING"] = "utf-8"
+
+_ORIGINAL_STDOUT = sys.stdout
+_ORIGINAL_STDERR = sys.stderr
+
+
+class _QFluentTipFilter:
+    def __init__(self, stream):
+        self._stream = stream
+
+    def write(self, text):
+        value = str(text)
+        if any(token in value for token in ("QFluentWidgets Pro", "qfluentwidgets.com", "Tips:")):
+            return
+        if value.strip() == "":
+            return
+        self._stream.write(text)
+
+    def flush(self):
+        self._stream.flush()
+
+    def isatty(self):
+        return self._stream.isatty()
+
+    def __getattr__(self, name):
+        return getattr(self._stream, name)
+
+
+sys.stdout = _QFluentTipFilter(_ORIGINAL_STDOUT)
+sys.stderr = _QFluentTipFilter(_ORIGINAL_STDERR)
+
 import pyappify
 
 # Fix for PySide6 KeyError: 'PATH'
@@ -47,7 +79,9 @@ from ok.util.collection import safe_get
 
 from ok.util.color import find_color_rectangles, mask_white, find_color_rectangles, color_range_to_bound, \
     calculate_color_percentage, get_mask_in_color_range, is_pure_black
-os.environ["PYTHONIOENCODING"] = "utf-8"
+
+sys.stdout = _ORIGINAL_STDOUT
+sys.stderr = _ORIGINAL_STDERR
 
 logger = Logger.get_logger("ok")
 

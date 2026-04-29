@@ -213,14 +213,26 @@ class DeviceManager:
                         self.device_dict[imei] = pc_device
                 return None
 
-            name, hwnd, full_path, x, y, width, height, hwnds = find_hwnd(self.windows_capture_config.get('title'),
-                                                                   self.windows_capture_config.get(
-                                                                       'exe') or self.config.get('selected_exe'), 0, 0,
+            title = self.windows_capture_config.get('title')
+            # If exe not explicitly set in config, only use selected_exe if title is also not set
+            exe_in_config = self.windows_capture_config.get('exe')
+            if exe_in_config:
+                exe_param = exe_in_config
+            elif not title:
+                # Only fall back to saved exe if no title specified either
+                exe_param = self.config.get('selected_exe')
+            else:
+                # Title is set but exe is not - don't filter by exe
+                exe_param = None
+            logger.info(f'update_pc_device: title={repr(title)}, exe_param={repr(exe_param)}')
+            name, hwnd, full_path, x, y, width, height, hwnds = find_hwnd(title,
+                                                                   exe_param, 0, 0,
                                                                    player_id=-1,
                                                                    class_name=self.windows_capture_config.get(
                                                                        'hwnd_class'),
                                                                    selected_hwnd=self.config.get('selected_hwnd'),
                                                                    top_hwnd_class=self.windows_capture_config.get('top_hwnd_class'))
+            logger.info(f'update_pc_device find_hwnd result: name={repr(name)}, hwnd={hwnd}, full_path={repr(full_path)}, width={width}, height={height}')
             exe_list = self.windows_capture_config.get('exe') or self.config.get('selected_exe')
             if isinstance(exe_list, str):
                 exe_list = [exe_list]

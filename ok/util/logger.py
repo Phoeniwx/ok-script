@@ -80,10 +80,8 @@ class SafeFileHandler(TimedRotatingFileHandler):
         try:
             if self.stream and not self.stream.closed:
                 super().emit(record)
-            else:
-                raise ValueError("I/O operation on closed file.")
         except Exception:
-            self.handleError(record)
+            pass  # Silently ignore errors to avoid cascading logging failures
 
 
 class CommunicateHandler(logging.Handler):
